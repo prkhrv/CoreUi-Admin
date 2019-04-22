@@ -1,1 +1,1 @@
-# CoreUi-Admin
+# Vue JS deployment
