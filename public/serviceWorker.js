@@ -49,6 +49,23 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   console.info('Event: Fetch');
 
+
+  console.log('The service worker is fetching the asset.');
+
+
+
+  event.respondWith(fromCache(event.request));
+
+
+
+
+  event.waitUntil(
+    update(event.request)
+
+
+    .then(refresh)
+  );
+
   var request = event.request;
 
   //Tell the browser to wait for newtwork request and respond with below
@@ -155,7 +172,7 @@ self.addEventListener('sync', (event) => {
   console.info('Event: Sync');
 
   //Check registered sync name or emulated sync from devTools
-  if (event.tag === 'github' || event.tag === 'test-tag-from-devtools') {
+  if (event.tag === 'github' || event.tag === 'test-tag-from-deventools') {
     event.waitUntil(
       //To check all opened tabs and send postMessage to those tabs
       self.clients.matchAll().then((all) => {
@@ -212,3 +229,6 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+
+
