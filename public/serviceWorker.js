@@ -47,27 +47,38 @@ self.addEventListener('install', (event) => {
 
 //Adding `fetch` event listener
 
-self.addEventListener('fetch', function (event) {
-    var requestURL = new URL(event.request.url);
-    var freshResource = fetch(event.request).then(function (response) {
-        var clonedResponse = response.clone();
-        // Don't update the cache with error pages!
-        if (response.ok) {
-            // All good? Update the cache with the network response
-            caches.open(cacheName).then(function (cache) {
-                cache.put(event.request, clonedResponse);
-            });
-        }
+self.addEventListener('fetch', (event) => {
+  console.info('Event: Fetch');
+
+  var request = event.request;
+
+  //Tell the browser to wait for newtwork request and respond with below
+  event.respondWith(
+    //If request is already in cache, return it
+    caches.match(request).then((response) => {
+      if (response) {
         return response;
-    });
-    var cachedResource = caches.open(cacheName).then(function (cache) {
-        return cache.match(event.request).then(function(response) {
-            return response || freshResource;
-        });
-    }).catch(function (e) {
-        return freshResource;
-    });
-    event.respondWith(cachedResource);
+      }
+
+      // // Checking for navigation preload response
+      // if (event.preloadResponse) {
+      //   console.info('Using navigation preload');
+      //   return response;
+      // }
+
+      //if request is not cached or navigation preload response, add it to cache
+      return fetch(request).then((response) => {
+        var responseToCache = response.clone();
+        caches.open(cacheName).then((cache) => {
+            cache.put(request, responseToCache).catch((err) => {
+              console.warn(request.url + ': ' + err.message);
+            });
+          });
+
+        return response;
+      });
+    })
+  );
 });
 
 
