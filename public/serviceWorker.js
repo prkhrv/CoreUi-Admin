@@ -49,9 +49,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', function (event) {
 
-
-	event.responseWith(	
-
+	
     var freshResource = fetch(event.request).then(function (response) {
         var clonedResponse = response.clone();
       
