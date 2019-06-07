@@ -47,40 +47,12 @@ self.addEventListener('install', (event) => {
 
 //Adding `fetch` event listener
 
-self.addEventListener('fetch', (event) => {
-  console.log("Service worker fetch event ");
+self.addEventListener('fetch', function (event) {
 
-  var request = event.request;
-  var requestURL = new URL(event.request.url);
+	console.log("fetch event now called");
 
-
-
-  //Tell the browser to wait for newtwork request and respond with below
-  event.respondWith(
-    //If request is already in cache, return it
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
-
-    var cachedResource = caches.open(cacheName).then(function (cache) {
-        return cache.match(event.request).then(function(response) {
-            return response || freshResource;
-        });
-    }).catch(function (e) {
-        return freshResource;
-    });
-    event.respondWith(cachedResource);
-
-      // // Checking for navigation preload response
-      // if (event.preloadResponse) {
-      //   console.info('Using navigation preload');
-      //   return response;
-      // }
-
-      //if request is not cached or navigation preload response, add it to cache
-
-        var freshResource = fetch(event.request).then(function (response) {
+    var requestURL = new URL(event.request.url);
+    var freshResource = fetch(event.request).then(function (response) {
         var clonedResponse = response.clone();
         // Don't update the cache with error pages!
         if (response.ok) {
@@ -91,9 +63,17 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
     });
-    })
-  );
+    var cachedResource = caches.open(cacheName).then(function (cache) {
+        return cache.match(event.request).then(function(response) {
+            return response || freshResource;
+        });
+    }).catch(function (e) {
+        return freshResource;
+    });
+    event.respondWith(cachedResource);
 });
+
+
 
 
 /*
