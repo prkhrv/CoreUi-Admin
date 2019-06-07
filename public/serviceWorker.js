@@ -56,11 +56,11 @@ self.addEventListener('fetch', function (event) {
             // All good? Update the cache with the network response
             caches.open(cacheName).then(function (cache) {
                 cache.put(event.request, clonedResponse);
-            });
+            }).catch(function(error){
+    			console.log("POST Error catch");
+    		});
         }
         return response;
-    }).catch(function(error){
-    	console.log("POST Error catch");
     });
     var cachedResource = caches.open(cacheName).then(function (cache) {
         return cache.match(event.request).then(function(response) {
