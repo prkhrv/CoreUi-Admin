@@ -51,6 +51,9 @@ self.addEventListener('fetch', (event) => {
   console.log("Service worker fetch event ");
 
   var request = event.request;
+  var requestURL = new URL(event.request.url);
+
+
 
   //Tell the browser to wait for newtwork request and respond with below
   event.respondWith(
@@ -60,6 +63,15 @@ self.addEventListener('fetch', (event) => {
         return response;
       }
 
+    var cachedResource = caches.open(cacheName).then(function (cache) {
+        return cache.match(event.request).then(function(response) {
+            return response || freshResource;
+        });
+    }).catch(function (e) {
+        return freshResource;
+    });
+    event.respondWith(cachedResource);
+
       // // Checking for navigation preload response
       // if (event.preloadResponse) {
       //   console.info('Using navigation preload');
@@ -67,16 +79,18 @@ self.addEventListener('fetch', (event) => {
       // }
 
       //if request is not cached or navigation preload response, add it to cache
-      return fetch(request).then((response) => {
-        var responseToCache = response.clone();
-        caches.open(cacheName).then((cache) => {
-            cache.put(request, responseToCache).catch((err) => {
-              console.warn(request.url + ': ' + err.message);
-            });
-          });
 
+        var freshResource = fetch(event.request).then(function (response) {
+        var clonedResponse = response.clone();
+        // Don't update the cache with error pages!
+        if (response.ok) {
+            // All good? Update the cache with the network response
+            caches.open(cacheName).then(function (cache) {
+                cache.put(event.request, clonedResponse);
+            });
+        }
         return response;
-      });
+    });
     })
   );
 });
