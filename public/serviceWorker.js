@@ -56,9 +56,7 @@ self.addEventListener('fetch', function (event) {
             // All good? Update the cache with the network response
             caches.open(cacheName).then(function (cache) {
                 cache.put(event.request, clonedResponse);
-            }).catch(function(error){
-    			console.log("POST Error catch");
-    		});
+            });
         }
         return response;
     });
@@ -69,7 +67,17 @@ self.addEventListener('fetch', function (event) {
     }).catch(function (e) {
         return freshResource;
     });
-    event.respondWith(cachedResource);
+
+    if(event.request.method == 'POST'){
+
+    	print("POST Event");
+
+    }
+    else
+    {
+		event.respondWith(cachedResource);
+    }
+    
 
 
 
