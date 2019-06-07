@@ -49,19 +49,25 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', function (event) {
 
-
-	event.respondWith(
-    caches.match(event.request).then(function(resp) {
-      return resp || fetch(event.request).then(function(response) {
-        return caches.open(cacheName).then(function(cache) {
-          cache.put(event.request, response.clone());
-          return response;
-        });  
-      });
-    })
-  );
-
-
+    var freshResource = fetch(event.request).then(function (response) {
+        var clonedResponse = response.clone();
+        // Don't update the cache with error pages!
+        if (response.ok) {
+            // All good? Update the cache with the network response
+            caches.open(cacheName).then(function (cache) {
+                cache.put(event.request, clonedResponse);
+            });
+        }
+        return response;
+    });
+    var cachedResource = caches.open(cacheName).then(function (cache) {
+        return cache.match(event.request).then(function(response) {
+            return response || freshResource;
+        });
+    }).catch(function (e) {
+        return freshResource;
+    });
+    event.respondWith(cachedResource);
 
 
 
