@@ -48,13 +48,6 @@ self.addEventListener('install', (event) => {
 //Adding `fetch` event listener
 
 self.addEventListener('fetch', function (event) {
-
-	if(event.request.method == 'POST'){
-		event.respondWith(fetch(event.request));
-	}
-
-    else{
-
     	var freshResource = fetch(event.request).then(function (response) {
         var clonedResponse = response.clone();
         // Don't update the cache with error pages!
@@ -73,10 +66,8 @@ self.addEventListener('fetch', function (event) {
     }).catch(function (e) {
         return freshResource;
     });
-
-    
-		event.respondWith(cachedResource);
-   }
+		
+	event.respondWith(cachedResource);
     
 });
 
