@@ -49,7 +49,16 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', function (event) {
 
-    var freshResource = fetch(event.request).then(function (response) {
+	if(event.request.method == 'POST'){
+		return fetch(event.request).then(function(response){
+				cache.put(event.request,response.clone());
+				return response;
+			});
+	}
+
+    else{
+
+    	var freshResource = fetch(event.request).then(function (response) {
         var clonedResponse = response.clone();
         // Don't update the cache with error pages!
         if (response.ok) {
@@ -68,19 +77,10 @@ self.addEventListener('fetch', function (event) {
         return freshResource;
     });
 
-    if(event.request.method == 'POST'){
-
-    	event.respondWith(fetch(event.request));
-
-    }
-    else
-    {
-		event.respondWith(cachedResource);
-    }
     
-
-
-
+		event.respondWith(cachedResource);
+   }
+    
 });
 
 
