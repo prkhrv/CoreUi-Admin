@@ -51,26 +51,30 @@ self.addEventListener('fetch', function (event) {
 
 	console.log("fetch event now called");
 
-    var requestURL = new URL(event.request.url);
-    var freshResource = fetch(event.request).then(function (response) {
-        var clonedResponse = response.clone();
-        // Don't update the cache with error pages!
-        if (response.ok) {
-            // All good? Update the cache with the network response
-            caches.open(cacheName).then(function (cache) {
-                cache.put(event.request, clonedResponse);
-            });
-        }
-        return response;
-    });
-    var cachedResource = caches.open(cacheName).then(function (cache) {
-        return cache.match(event.request).then(function(response) {
-            return response || freshResource;
-        });
-    }).catch(function (e) {
-        return freshResource;
-    });
-    event.respondWith(cachedResource);
+
+	event.respondWith(
+		caches.open(cacheName).then(function(cache){
+
+			console.log("###############");
+			return fetch(event.request).then(function(response){
+				cache.put(event.request,response.clone());
+				return response;
+			});
+		})
+	);
+
+    // var requestURL = new URL(event.request.url);
+    // var freshResource = fetch(event.request).then(function (response) {
+    //     var clonedResponse = response.clone();
+    // });
+    // var cachedResource = caches.open(cacheName).then(function (cache) {
+    //     return cache.match(event.request).then(function(response) {
+    //         return response || freshResource;
+    //     });
+    // }).catch(function (e) {
+    //     return freshResource;
+    // });
+    // event.respondWith(cachedResource);
 });
 
 
