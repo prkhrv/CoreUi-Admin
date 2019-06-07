@@ -70,7 +70,7 @@ self.addEventListener('fetch', function (event) {
 
     if(event.request.method == 'POST'){
 
-    	print("POST Event");
+    	event.respondWith(fetch(event.request));
 
     }
     else
