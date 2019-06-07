@@ -49,25 +49,18 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', function (event) {
 
-	
-    var freshResource = fetch(event.request).then(function (response) {
-        var clonedResponse = response.clone();
-      
-            caches.open(cacheName).then(function (cache) {
 
-            	console.log("new cache update")
-                cache.put(event.request, clonedResponse);
-            });
-        return response;
-    });
-    var cachedResource = caches.open(cacheName).then(function (cache) {
-        return cache.match(event.request).then(function(response) {
-            return response || freshResource;
-        });
-    }).catch(function (e) {
-        return freshResource;
-    });
-    event.respondWith(cachedResource);
+	event.respondWith(
+    caches.match(event.request).then(function(resp) {
+      return resp || fetch(event.request).then(function(response) {
+        return caches.open(cacheName).then(function(cache) {
+          cache.put(event.request, response.clone());
+          return response;
+        });  
+      });
+    })
+  );
+
 
 
 
