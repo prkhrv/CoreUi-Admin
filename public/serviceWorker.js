@@ -51,8 +51,10 @@ self.addEventListener('fetch', function (event) {
 
 	if(event.request.method == 'POST'){
 		return fetch(event.request).then(function(response){
+			caches.open(cacheName).then(function(cache){
 				cache.put(event.request,response.clone());
-				return response;
+			});
+			return response;
 			});
 	}
 
