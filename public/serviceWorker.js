@@ -49,29 +49,29 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', function (event) {
 
-	
-    var freshResource = fetch(event.request).then(function (response) {
-        var clonedResponse = response.clone();
-      
-            caches.open(cacheName).then(function (cache) {
 
-            	console.log("new cache update")
-                cache.put(event.request, clonedResponse);
-            });
-        return response;
-    });
-    var cachedResource = caches.open(cacheName).then(function (cache) {
-        return cache.match(event.request).then(function(response) {
-            return response || freshResource;
-        });
-    }).catch(function (e) {
-        return freshResource;
-    });
-    event.respondWith(cachedResource);
+	console.log("The service wroker is serving");
+
+	event.respondWith(fromCache(event.request));
+
+	event.waitUntil(update(event.request));
 
 
+	function fromCache(request){
+		return caches.open(cacheName).then(function(cache){
+			return cache.match(request);
+		});
+	}
 
-
+	function update(request){
+		return caches.open(cacheName).then(function(cache){
+			return fetch(request).then(function(response){
+				return cache.put(request, response.clone()).then(function(){
+					return response;
+				});
+			});
+		});
+	}
 });
 
 
