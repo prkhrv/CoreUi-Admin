@@ -59,6 +59,8 @@ self.addEventListener('fetch', function (event) {
             });
         }
         return response;
+    }).catch(function(error){
+    	console.log("POST Error catch");
     });
     var cachedResource = caches.open(cacheName).then(function (cache) {
         return cache.match(event.request).then(function(response) {
